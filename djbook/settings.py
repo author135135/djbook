@@ -39,7 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
+    # 'debug_toolbar',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -101,8 +101,18 @@ USE_L10N = True
 
 USE_TZ = True
 
+if DEBUG:
+    import mimetypes
+    mimetypes.add_type("text/css", ".css", True)
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
+STATICFILES_DIRS = (
+	os.path.join(BASE_DIR, 'static'),
+)
+
+
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
