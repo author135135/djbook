@@ -1,4 +1,3 @@
 # djbook
 
 Test application.
-asdasd
