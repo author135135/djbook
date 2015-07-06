@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import datetime
+from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -23,7 +25,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('question_text', models.CharField(max_length=200)),
-                ('pub_date', models.DateTimeField(verbose_name=b'date published')),
+                ('pub_date', models.DateTimeField(default=datetime.datetime(2015, 7, 6, 11, 36, 41, 684354, tzinfo=utc), verbose_name=b'date published')),
             ],
         ),
         migrations.AddField(
