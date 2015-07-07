@@ -1,28 +1,29 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from polls.models import Question, Choice
 
-
-def index(request):
-    questions = Question.objects.order_by('-pub_date')[:5]
-    return render(request, template_name='polls/index.html', context={
-        'latest_question_list': questions,
-    })
+from django.views import generic
 
 
-def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, template_name='polls/detail.html', context={
-        'question': question,
-    })
+class IndexView(generic.ListView):
+    template_name = 'polls/index.html'
+    context_object_name = 'latest_question_list'
+    queryset = Question.objects.order_by('-pub_date')[:5]
 
 
-def results(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, template_name="polls/results.html", context={
-        'question': question,
-    })
+class DetailView(generic.DetailView):
+    template_name = 'polls/detail.html'
+    context_object_name = 'question'
+    model = Question
+    pk_url_kwarg = 'question_id'
+
+
+class ResultsView(generic.DetailView):
+    template_name = 'polls/results.html'
+    context_object_name = 'question'
+    model = Question
+    pk_url_kwarg = 'question_id'
 
 
 def vote(request, question_id):
