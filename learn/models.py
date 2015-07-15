@@ -17,8 +17,9 @@ class Person(models.Model):
     )
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    company = models.ForeignKey('Company')
     position = models.CharField(max_length=255, choices=POSITIONS)
-    recruitment = models.DateField(default=timezone.now().date())
+    recruitment = models.DateField(default='django.utils.timezone.now')
     retirement = models.DateField(blank=True, null=True, name='leaving work')
 
     def __unicode__(self):
@@ -32,6 +33,11 @@ class Person(models.Model):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'position']
     list_filter = ['position', 'recruitment']
+
+
+class Company(models.Model):
+    name = models.CharField(max_length=75)
+    description = models.TextField()
 
 
 admin.site.register(Person, PersonAdmin)
