@@ -4,5 +4,5 @@ from learn.models import Person
 
 
 def index(request):
-    person = get_object_or_404(Person, pk=1)
-    return HttpResponse(person)
+    response = Person.objects.get(pk=1)
+    return HttpResponse(response)
