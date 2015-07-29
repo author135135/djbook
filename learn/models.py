@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib import admin
 from django.utils import timezone
 
 
@@ -30,9 +29,9 @@ class Person(models.Model):
         verbose_name_plural = 'persons'
 
 
-class PersonAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'company', 'position']
-    list_filter = ['company', 'position', 'recruitment']
+class PersonProxy(Person):
+    class Meta:
+        proxy = True
 
 
 class Company(models.Model):
@@ -43,13 +42,18 @@ class Company(models.Model):
     def __unicode__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        print "Add new company `%s`" % self.name
+        super(Company, self).save(*args, **kwargs)
+
+    def _is_old_company(self):
+        return self.founding_date < timezone.datetime(2000, 1, 1).date()
+
+    is_old_company = property(_is_old_company)
+
     class Meta:
         db_table = 'company'
         verbose_name_plural = 'companies'
-
-
-class CompanyAdmin(admin.ModelAdmin):
-    list_display = ['name']
 
 
 class Tasks(models.Model):
@@ -70,11 +74,57 @@ class Tasks(models.Model):
         verbose_name_plural = 'tasks'
 
 
-class TasksAdmin(admin.ModelAdmin):
-    list_display = ['title', 'created', 'deadline']
-    list_filter = ['created', 'deadline']
+class PersonNote(Person):
+    title = models.CharField(max_length=75)
+    note = models.TextField(help_text="Note about person")
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        db_table = 'person_note'
+        verbose_name_plural = 'persons notes'
 
 
-admin.site.register(Person, PersonAdmin)
-admin.site.register(Company, CompanyAdmin)
-admin.site.register(Tasks, TasksAdmin)
+class Blog(models.Model):
+    name = models.CharField(max_length=100)
+    tagline = models.TextField()
+
+    def __unicode__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        from django.core.urlresolvers import reverse
+        return reverse('learn:detail', kwargs={'blog_id': self.id})
+
+    class Meta:
+        db_table = 'blog'
+        ordering = ['name']
+
+class Author(models.Model):
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'author'
+        ordering = ['name']
+
+class Entry(models.Model):
+    blog = models.ForeignKey(Blog)
+    headline = models.CharField(max_length=255)
+    body_text = models.TextField()
+    pub_date = models.DateField()
+    mod_date = models.DateField()
+    authors = models.ManyToManyField(Author)
+    n_comments = models.IntegerField()
+    n_pingbacks = models.IntegerField()
+    rating = models.IntegerField()
+
+    def __unicode__(self):
+        return self.headline
+
+    class Meta:
+        db_table = 'blog_entry'
