@@ -86,20 +86,30 @@ class PersonNote(Person):
         verbose_name_plural = 'persons notes'
 
 
+class HomerBlogManager(models.Manager):
+    def get_queryset(self):
+        return super(HomerBlogManager, self).get_queryset().filter(name__icontains='Homer')
+
+
 class Blog(models.Model):
     name = models.CharField(max_length=100)
     tagline = models.TextField()
+
+    objects = models.Manager()
+    homer = HomerBlogManager()
 
     def __unicode__(self):
         return self.name
 
     def get_absolute_url(self):
         from django.core.urlresolvers import reverse
+
         return reverse('learn:detail', kwargs={'blog_id': self.id})
 
     class Meta:
         db_table = 'blog'
         ordering = ['name']
+
 
 class Author(models.Model):
     name = models.CharField(max_length=50)
@@ -111,6 +121,7 @@ class Author(models.Model):
     class Meta:
         db_table = 'author'
         ordering = ['name']
+
 
 class Entry(models.Model):
     blog = models.ForeignKey(Blog)
