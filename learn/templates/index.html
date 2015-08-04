@@ -5,6 +5,15 @@
     <title></title>
 </head>
 <body>
-    {{ response }}
+<p>You have blog(s)</p>
+{% for blog in blogs %}
+    <p>{{ blog }}</p>
+{% endfor %}
+<hr>
+<br>
+<br>
+{% for blog in blogs %}
+    <p>{{ blog }}</p>
+{% endfor %}
 </body>
 </html>

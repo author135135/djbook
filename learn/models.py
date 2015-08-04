@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from learn import fields
 
 
 class Person(models.Model):
@@ -94,6 +95,7 @@ class HomerBlogManager(models.Manager):
 class Blog(models.Model):
     name = models.CharField(max_length=100)
     tagline = models.TextField()
+    image = models.ImageField(verbose_name='blog_logo', upload_to='blog_logo', blank=True)
 
     objects = models.Manager()
     homer = HomerBlogManager()
