@@ -5,15 +5,20 @@
     <title></title>
 </head>
 <body>
-<p>You have blog(s)</p>
-{% for blog in blogs %}
-    <p>{{ blog }}</p>
-{% endfor %}
-<hr>
-<br>
-<br>
-{% for blog in blogs %}
-    <p>{{ blog }}</p>
+<h2>Today: {{ date }}</h2>
+{% for entry in entries %}
+    <div>
+        <p><b>Author: </b>
+            {% for author in entry.authors.all %}
+                <a href="{% url 'learn:detail' author.pk  %}">{{ author.name }}</a>
+            {% endfor %}
+            &nbsp;&nbsp;&nbsp;{{ entry.pub_date }}</p>
+        <p>
+            <b>{{ entry.headline }}</b><br>
+            {{ entry.body_text }}
+        </p>
+    </div>
+    <hr>
 {% endfor %}
 </body>
 </html>

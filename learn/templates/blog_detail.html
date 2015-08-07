@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1>Welcome to {{ author.name }} page</h1>
+<hr>
+<p>You can view my blog list or my last blog entries. Enjoy!</p>
+{% if blogs %}
+    <h3>My blogs</h3>
+    <ul>
+        {% for blog in blogs %}
+            <li>
+                <a href="{% url 'learn:edit' blog.id %}">{{ blog.name }}</a>&nbsp;&nbsp;&nbsp;
+                <span style="font-size: 12px;">
+                    <a href="{% url 'learn:delete' blog.id %}">delete blog</a>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if entries %}
+    <h3>My latest entries</h3>
+    <ul>
+        {% for entry in entries %}
+            <li>{{ entry.headline }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>Delete {{ blog.name }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div>Are you sure delete `{{ blog.name }}` blog ?</div>
+        <p><input type="submit" value="Delete"></p>
+        <p><a href="#" onclick="history.back();return false;">Return</a></p>
+    </form>
+</body>
+</html>

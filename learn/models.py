@@ -108,6 +108,12 @@ class Blog(models.Model):
 
         return reverse('learn:detail', kwargs={'blog_id': self.id})
 
+    def delete(self, using=None):
+        for entry in self.entry_set.all():
+            entry.delete()
+
+        return super(Blog, self).delete(using)
+
     class Meta:
         db_table = 'blog'
         ordering = ['name']
@@ -141,3 +147,4 @@ class Entry(models.Model):
 
     class Meta:
         db_table = 'blog_entry'
+        ordering = ['-pub_date']

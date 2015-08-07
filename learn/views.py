@@ -1,8 +1,12 @@
+# coding: utf-8
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, Http404, JsonResponse
-from learn.models import Person, Entry, Blog
 from django.views.decorators.http import *
 from django.views.decorators.gzip import gzip_page
+from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView
+from learn.models import Person, Entry, Blog, Author
+from learn.forms import UploadFileForm, ContactForm
 import datetime
 
 
@@ -41,7 +45,6 @@ def day(request, *args, **kwargs):
 
 
 def upload_file(request):
-    from learn.forms import UploadFileForm
     from djbook import settings
 
     if request.method == 'POST':
@@ -62,3 +65,81 @@ def upload_file(request):
     return render(request, template_name='upload.html', context={
         'form': form,
     })
+
+
+# Static page view
+class StaticPageView(TemplateView):
+    template_name = 'static_page.html'
+
+
+class TestManyDataMixin(object):
+    def get_context_data(self, **kwargs):
+        context = super(TestManyDataMixin, self).get_context_data(**kwargs)
+        context['many_data_mixin'] = 'value'
+
+        return context
+
+
+class EntryListView(TestManyDataMixin, ListView):
+    template_name = 'index.html'
+    queryset = Entry.objects.all().prefetch_related('authors')
+    context_object_name = 'entries'
+
+    def get_context_data(self, **kwargs):
+        context = super(EntryListView, self).get_context_data(**kwargs)
+        context['date'] = datetime.datetime.now().date()
+
+        return context
+
+
+class BlogDetailView(TestManyDataMixin, DetailView):
+    model = Author
+    template_name = 'blog_detail.html'
+    context_object_name = 'author'
+
+    def get_context_data(self, **kwargs):
+        context = super(BlogDetailView, self).get_context_data(**kwargs)
+        context['blogs'] = Blog.objects.filter(entry__authors=self.object).distinct()
+        context['entries'] = Entry.objects.filter(authors=self.object)[:5]
+
+        return context
+
+
+# Contact form CBV
+class ContactView(FormView):
+    template_name = 'contacts.html'
+    form_class = ContactForm
+    success_url = '/test/'
+
+    def form_valid(self, form):
+        form.send()
+
+        return super(ContactView, self).form_valid(form)
+
+
+# CBV to model Blog
+class TestMixin(object):
+    def get_object(self, queryset=None):
+        obj = super(TestMixin, self).get_object(queryset)
+        print obj
+        return obj
+
+
+class CreateBlogView(CreateView):
+    model = Blog
+    fields = ['name', 'tagline', 'image']
+    template_name = 'blog_create.html'
+    success_url = '/test/'
+
+
+class EditBlogView(UpdateView):
+    model = Blog
+    fields = ['name', 'tagline', 'image']
+    template_name = 'blog_edit.html'
+    success_url = '/test/'
+
+
+class DeleteBlogView(DeleteView):
+    model = Blog
+    success_url = '/test/'
+    template_name = 'blog_delete.html'
