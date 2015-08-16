@@ -1,0 +1,1 @@
+{{ head_row }}{% for row in rows %}{% for k, v in row.iteritems %}{{ v }}{% if not forloop.last %},{% endif %}{% endfor %}{% endfor %}

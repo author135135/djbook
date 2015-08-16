@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, Http404, JsonResponse
 from django.views.decorators.http import *
 from django.views.decorators.gzip import gzip_page
-from django.views.generic import TemplateView, ListView, DetailView
-from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, DetailView, View
+from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView, TemplateResponseMixin, ContextMixin
 from learn.models import Person, Entry, Blog, Author
 from learn.forms import UploadFileForm, ContactForm
 import datetime
@@ -67,9 +67,87 @@ def upload_file(request):
     })
 
 
+def download_csv(request):
+    import csv
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="blogs.csv"'
+
+    blogs = list(Blog.objects.all().values())
+
+    if not blogs:
+        return HttpResponse('No blogs found')
+
+    writer = csv.DictWriter(f=response, fieldnames=blogs[0].keys())
+    writer.writeheader()
+    for blog in blogs:
+        for k, v in blog.iteritems():
+            if type(v) is unicode:
+                blog[k] = v.encode('utf-8')
+        writer.writerow(blog)
+
+    return response
+
+
+def download_csv_txt(request):
+    from django.shortcuts import render
+
+    blogs = list(Blog.objects.all().values())
+
+    if not blogs:
+        return HttpResponse('No blogs found')
+
+    for blog in blogs:
+        for k, v in blog.iteritems():
+            if type(v) is unicode:
+                blog[k] = v.encode('utf-8')
+
+    response = render(request, template_name='csv_template.txt', context={
+        'head_row': ','.join(blogs[0].keys()),
+        'rows': blogs
+    })
+
+    response['Content-Type'] = 'text/csv'
+    response['Content-Disposition'] = 'attachment; filename="blogs.csv"'
+
+    return response
+
+
+# Generate pdf
+def pdfview(request):
+    from reportlab.pdfgen import canvas
+
+    response = HttpResponse(content_type='application/pdf')
+
+    c = canvas.Canvas(response, bottomup=False)
+    t = c.beginText(100, 100)
+    t.textLine("Blogs")
+
+    c.drawText(t)
+
+    c.showPage()
+    c.save()
+
+    return response
+
+
+
 # Static page view
-class StaticPageView(TemplateView):
+class StaticPageView(TemplateResponseMixin, ContextMixin, View):
     template_name = 'static_page.html'
+
+    def get_context_data(self, **kwargs):
+        from django.utils.lorem_ipsum import paragraphs
+
+        context = super(StaticPageView, self).get_context_data(**kwargs)
+        context['static_text'] = paragraphs(3)
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+
+        return self.render_to_response(context)
 
 
 class TestManyDataMixin(object):
@@ -84,6 +162,7 @@ class EntryListView(TestManyDataMixin, ListView):
     template_name = 'index.html'
     queryset = Entry.objects.all().prefetch_related('authors')
     context_object_name = 'entries'
+    paginate_by = 5
 
     def get_context_data(self, **kwargs):
         context = super(EntryListView, self).get_context_data(**kwargs)
