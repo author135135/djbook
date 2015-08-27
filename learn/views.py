@@ -1,5 +1,5 @@
 # coding: utf-8
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, render_to_response
 from django.http import HttpResponse, Http404, JsonResponse
 from django.views.decorators.http import *
 from django.views.decorators.gzip import gzip_page
@@ -46,6 +46,8 @@ def day(request, *args, **kwargs):
 
 def upload_file(request):
     from djbook import settings
+    from django.template.loader import get_template
+    from django.template import engines
 
     if request.method == 'POST':
         print request.FILES
@@ -62,7 +64,13 @@ def upload_file(request):
     else:
         form = UploadFileForm()
 
-    return render(request, template_name='upload.html', context={
+    """template = get_template(template_name='upload.html')
+
+    return HttpResponse(template.render(context={
+        'form': form
+    }))"""
+
+    return render_to_response(request, template_name='upload.html', context={
         'form': form,
     })
 
