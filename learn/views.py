@@ -148,7 +148,7 @@ class StaticPageView(TemplateResponseMixin, ContextMixin, View):
         from django.utils.lorem_ipsum import paragraphs
 
         context = super(StaticPageView, self).get_context_data(**kwargs)
-        context['static_text'] = paragraphs(3)
+        context['static_text'] = paragraphs(10)
 
         return context
 

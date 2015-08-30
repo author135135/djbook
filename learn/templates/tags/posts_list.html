@@ -1,0 +1,7 @@
+{% if entries %}
+    <ul>
+        {% for e in entries %}
+            <li>{{ e.headline }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

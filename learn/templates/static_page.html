@@ -1,13 +1,38 @@
+{% load learn_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <style>
+        .marked {
+            color: #417690;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h1>Static page</h1>
-    {% for paragrath in static_text %}
-        <p>{{ paragrath }}</p>
-    {% endfor %}
+    <div style="float: left; width: 200px; ">
+        {% posts_list %}
+    </div>
+    <div style="float: left; width: 75%">
+        <ol>
+            {% for p in static_text %}
+                <li class="{% cycle 'odd' 'even' %}">{{ p|mark_sub:'Lorem ipsum' }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+    <div style="clear: both;">{% counter %}</div>
+    {% register_var as assignment_tag_var %}
+    {{ assignment_tag_var }}
+    {% comment 'Output list by filter' %}
+    <ol>
+        {{ static_text|unordered_list }}
+    </ol>
+    {% endcomment %}
+    {% comment 'test filter' %}
+    {{ '1000'|filesizeformat }}
+    {% endcomment %}
 </body>
 </html>
