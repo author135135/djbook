@@ -1,12 +1,13 @@
 # coding: utf-8
 from django.shortcuts import render, get_object_or_404, redirect, render_to_response
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponse, Http404, JsonResponse
 from django.views.decorators.http import *
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView, TemplateResponseMixin, ContextMixin
 from learn.models import Person, Entry, Blog, Author
-from learn.forms import UploadFileForm, ContactForm
+from learn.forms import UploadFileForm, ContactForm, NameForm, DivErrorList
 import datetime
 
 
@@ -42,37 +43,6 @@ def month(request, *args, **kwargs):
 
 def day(request, *args, **kwargs):
     return HttpResponse("Year: %(year)s<br>Month: %(month)s<br>Day: %(day)s" % kwargs)
-
-
-def upload_file(request):
-    from djbook import settings
-    from django.template.loader import get_template
-    from django.template import engines
-
-    if request.method == 'POST':
-        print request.FILES
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            if form.cleaned_data['title']:
-                filename = settings.os.path.join(settings.MEDIA_ROOT, form.cleaned_data['title'])
-            else:
-                filename = settings.os.path.join(settings.MEDIA_ROOT, request.FILES['file'].name)
-            with open(filename, 'wb+') as new_file:
-                for chunk in request.FILES['file'].chunks():
-                    new_file.write(chunk)
-            return redirect(request.META['HTTP_REFERER'], permanent=True)
-    else:
-        form = UploadFileForm()
-
-    """template = get_template(template_name='upload.html')
-
-    return HttpResponse(template.render(context={
-        'form': form
-    }))"""
-
-    return render_to_response(request, template_name='upload.html', context={
-        'form': form,
-    })
 
 
 def download_csv(request):
@@ -139,8 +109,8 @@ def pdfview(request):
     return response
 
 
-
 # Static page view
+
 class StaticPageView(TemplateResponseMixin, ContextMixin, View):
     template_name = 'static_page.html'
 
@@ -230,3 +200,43 @@ class DeleteBlogView(DeleteView):
     model = Blog
     success_url = '/test/'
     template_name = 'blog_delete.html'
+
+
+class UploadFormView(FormView):
+    template_name = 'upload_form.html'
+    form_class = UploadFileForm
+
+    def form_valid(self, form):
+        from django.core.urlresolvers import reverse
+        from djbook import settings
+
+        self.success_url = reverse('learn:upload-form')
+
+        if form.cleaned_data['title']:
+            filename = settings.os.path.join(settings.MEDIA_ROOT, form.cleaned_data['title'])
+        else:
+            filename = settings.os.path.join(settings.MEDIA_ROOT, self.request.FILES['file'].name)
+
+        with open(filename, 'wb+') as new_file:
+            for chunk in self.request.FILES['file'].chunks():
+                new_file.write(chunk)
+
+        return super(UploadFormView, self).form_valid(form)
+
+
+class FormsTestView(SuccessMessageMixin, FormView):
+    template_name = 'forms-test.html'
+    form_class = NameForm
+    success_message = 'Form success'
+
+    def form_valid(self, form):
+        from django.core.urlresolvers import reverse
+
+        self.success_url = reverse('learn:forms_test')
+        return super(FormsTestView, self).form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(FormsTestView, self).get_form_kwargs()
+        kwargs['auto_id'] = False
+        kwargs['error_class'] = DivErrorList
+        return kwargs

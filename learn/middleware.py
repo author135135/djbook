@@ -17,7 +17,8 @@ class LearnMiddleware(object):
         return None
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        print view_func.func_name
+        if hasattr(view_func, 'func_name'):
+            print view_func.func_name
         print view_args
         print view_kwargs
 
@@ -35,6 +36,7 @@ class LearnMiddleware(object):
         response.set_cookie('counter', int(request.COOKIES.get('counter', 0)) + 1)
 
         return response
-
+    """
     def process_exception(self, request, exception):
         return HttpResponse(u"Exception: {0}".format(exception))
+    """

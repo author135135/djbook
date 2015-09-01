@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from learn import views
 
 blogpatterns = [
-    url(r'^upload/$', views.upload_file),
+    url(r'^upload/$', views.UploadFormView.as_view(), name='upload-form'),
     url(r'^static-page/$', views.StaticPageView.as_view()),
     url(r'^(?P<year>[0-9]{4})/$', views.year),
     url(r'^(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/$', views.month),
@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^$', views.EntryListView.as_view(), name='index'),
     url(r'^page/(?P<page>[0-9]+)/$', views.EntryListView.as_view(), name='paginate'),
     url(r'^blog/', include(blogpatterns)),
+    url(r'^forms-test/$', views.FormsTestView.as_view(), name='forms_test'),
 ]
