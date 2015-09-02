@@ -37,6 +37,12 @@ class NameForm(TestForm):
     your_name = forms.CharField(max_length=100, initial='Initial value')
     phone = PhoneField(label='Your Phone', widget=LongTextInput)
 
+    def clean_phone(self):
+        if '063' not in self.cleaned_data['phone']:
+            raise forms.ValidationError('Wrong phone number. Phone number must contains %(mask)s', code='invalid',
+                                        params={'mask': '063'})
+        return self.cleaned_data
+
 
 class BlogForm(forms.ModelForm):
     from learn.validators import homer_validator
