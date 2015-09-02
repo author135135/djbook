@@ -7,15 +7,8 @@ from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView, TemplateResponseMixin, ContextMixin
 from learn.models import Person, Entry, Blog, Author
-from learn.forms import UploadFileForm, ContactForm, NameForm, DivErrorList
+from learn.forms import UploadFileForm, ContactForm, NameForm, DivErrorList, BlogForm
 import datetime
-
-
-def index(request):
-    blogs = Blog.objects.all()
-    # response = ', '.join(map(unicode, Entry.objects.filter(blog__in=list(blogs))))
-    return render(request, template_name='index.html',
-                  context={'blogs': blogs}, content_type="text/html")
 
 
 def get_last_modified(request, *args, **kwargs):
@@ -184,9 +177,20 @@ class TestMixin(object):
 
 class CreateBlogView(CreateView):
     model = Blog
-    fields = ['name', 'tagline', 'image']
     template_name = 'blog_create.html'
     success_url = '/test/'
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            from django import forms
+
+            form_class = forms.modelform_factory(self.model, fields='__all__', exclude=['image'])
+        return super(CreateView, self).get_form(form_class)
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateBlogView, self).get_form_kwargs()
+        kwargs['error_class'] = DivErrorList
+        return kwargs
 
 
 class EditBlogView(UpdateView):

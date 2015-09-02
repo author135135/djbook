@@ -16,3 +16,8 @@ class LongTextInput(Input):
         final_attrs = self.build_attrs(attrs, name=name)
 
         return format_html('<input{} />', flatatt(final_attrs))
+
+    class Media:
+        css = {
+            'all': ('learn/forms.css',)
+        }

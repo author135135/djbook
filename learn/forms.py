@@ -38,6 +38,33 @@ class NameForm(TestForm):
     phone = PhoneField(label='Your Phone', widget=LongTextInput)
 
 
+class BlogForm(forms.ModelForm):
+    from learn.validators import homer_validator
+
+    name = forms.CharField(label='Your name', widget=forms.Textarea(attrs={'cols': 40, 'rows': 2}),
+                           validators=[homer_validator])
+
+    class Meta:
+        from learn.models import Blog
+
+        model = Blog
+        fields = '__all__'
+        exclude = ['image']
+        error_messages = {
+            'tagline': {
+                'required': 'Enter some words associated with this blog.',
+            },
+        }
+        widgets = {
+            'tagline': forms.TextInput(attrs={'size': 40})
+        }
+
+    def save(self, commit=True):
+        if self.cleaned_data['name'] == 'Homer':
+            raise forms.ValidationError('Homer, you don\'t have access to this operation.')
+        return super(BlogForm, self).save(commit=commit)
+
+
 # Custom errors class
 class DivErrorList(ErrorList):
     def __unicode__(self):

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <style>
+        .error { color: red; }
+    </style>
 </head>
 <body>
     <h1>Create New Blog</h1>
@@ -12,6 +15,7 @@
             <div>
                 <div>{{ field.label_tag }}</div>
                 <div>{{ field }}</div>
+                {{ field.errors }}
             </div><br>
         {% endfor %}
         <input type="submit" value="Create">
